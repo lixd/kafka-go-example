@@ -8,6 +8,7 @@ const (
 	Topic2           = "consumerGroup"
 	Topic3           = "benchmark"
 	TopicPartition   = "partition"
+	TopicCompression = "compression"
 	DefaultPartition = 0
 	ConsumerGroupID  = "cg1"
 	ConsumerGroupID2 = "cg2"
