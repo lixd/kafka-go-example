@@ -12,4 +12,5 @@ Kafka Go 系列教程，配合以下文章食用更加哦。
 [Kafka(Go)教程(六)---sarama 客户端 producer 源码分析](https://www.lixueduan.com/post/kafka/06-sarama-producer/)   
 [Kafka(Go)教程(七)---生产者分区机制原理剖析及实战](https://www.lixueduan.com/post/kafka/07-partition/)   
 [Kafka(Go)教程(八)---生产者压缩算法详解及源码分析](https://www.lixueduan.com/post/kafka/08-compression/)  
+[Kafka(Go)教程(九)---如何避免消息丢失?](https://www.lixueduan.com/post/kafka/09-avoid-msg-lost/)   
 
