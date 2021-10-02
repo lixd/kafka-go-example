@@ -15,4 +15,5 @@ Kafka Go 系列教程，配合以下文章食用更加哦。
 [Kafka(Go)教程(九)---如何避免消息丢失?](https://www.lixueduan.com/post/kafka/09-avoid-msg-lost/)   
 [Kafka(Go)教程(十)---Kafka 是如何实现精确一次（exactly once）语义的？](https://www.lixueduan.com/post/kafka/10-exactly-once-impl/)   
 [Kafka(Go)教程(十一)---Consumer Group & Rebalance ](https://www.lixueduan.com/post/kafka/11-consumer-group-rebalance/)  
+[Kafka(Go)教程(十二)---Kafka 中的高水位和 Leader Epoch 机制](https://www.lixueduan.com/post/kafka/12-hw-leader-epoch/)  
 
