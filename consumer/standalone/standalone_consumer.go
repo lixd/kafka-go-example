@@ -61,7 +61,7 @@ func Partitions(topic string) {
 	var wg sync.WaitGroup
 	// 然后每个分区开一个 goroutine 来消费
 	for _, partitionId := range partitions {
-		consumeByPartition(consumer, partitionId, &wg)
+		go consumeByPartition(consumer, partitionId, &wg)
 	}
 	wg.Wait()
 }
