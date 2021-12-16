@@ -62,14 +62,14 @@ func Partitions(topic string) {
 	wg.Add(len(partitions))
 	// 然后每个分区开一个 goroutine 来消费
 	for _, partitionId := range partitions {
-		go consumeByPartition(consumer, partitionId, &wg)
+		go consumeByPartition(consumer, topic, partitionId, &wg)
 	}
 	wg.Wait()
 }
 
-func consumeByPartition(consumer sarama.Consumer, partitionId int32, wg *sync.WaitGroup) {
+func consumeByPartition(consumer sarama.Consumer, topic string, partitionId int32, wg *sync.WaitGroup) {
 	defer wg.Done()
-	partitionConsumer, err := consumer.ConsumePartition(conf.Topic, partitionId, sarama.OffsetOldest)
+	partitionConsumer, err := consumer.ConsumePartition(topic, partitionId, sarama.OffsetOldest)
 	if err != nil {
 		log.Fatal("ConsumePartition err: ", err)
 	}
