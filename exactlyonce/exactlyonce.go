@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Shopify/sarama"
 	"kafka-go-example/conf"
+
+	"github.com/Shopify/sarama"
 )
 
 func Producer(topic string, limit int) {

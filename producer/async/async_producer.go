@@ -1,13 +1,15 @@
 package async
 
 import (
+	"context"
 	"log"
 	"strconv"
 	"sync/atomic"
 	"time"
 
-	"github.com/Shopify/sarama"
 	"kafka-go-example/conf"
+
+	"github.com/Shopify/sarama"
 )
 
 /*
@@ -49,7 +51,14 @@ func Producer(topic string, limit int) {
 		msg := &sarama.ProducerMessage{Topic: topic, Key: nil, Value: sarama.StringEncoder(str)}
 		// 异步发送只是写入内存了就返回了，并没有真正发送出去
 		// sarama 库中用的是一个 channel 来接收，后台 goroutine 异步从该 channel 中取出消息并真正发送
-		producer.Input() <- msg
+		// select + ctx 做超时控制,防止阻塞 producer.Input() <- msg 也可能会阻塞
+		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*10)
+		select {
+		case producer.Input() <- msg:
+		case <-ctx.Done():
+			log.Printf("msg:%v 发送超时\n", i)
+		}
+		cancel()
 		atomic.AddInt64(&count, 1)
 		if atomic.LoadInt64(&count)%1000 == 0 {
 			log.Printf("已发送消息数:%v\n", count)

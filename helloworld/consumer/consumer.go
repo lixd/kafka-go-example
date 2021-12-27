@@ -3,8 +3,9 @@ package consumer
 import (
 	"log"
 
-	"github.com/Shopify/sarama"
 	"kafka-go-example/conf"
+
+	"github.com/Shopify/sarama"
 )
 
 // Consume 消费者

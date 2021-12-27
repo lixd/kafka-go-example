@@ -5,8 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/Shopify/sarama"
 	"kafka-go-example/conf"
+
+	"github.com/Shopify/sarama"
 )
 
 /*
