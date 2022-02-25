@@ -16,13 +16,15 @@ services:
       - ./zookeeper:/bitnami/zookeeper
   # 该镜像具体配置参考 https://github.com/bitnami/bitnami-docker-kafka/blob/master/README.md
   kafka:
-    image: 'bitnami/kafka:latest'
+    #当前demo只测试了2.8版本，且没有使用KRaft
+    image: 'bitnami/kafka:2.8.0'
     ports:
       - '9092:9092'
       - '9999:9999'
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      # 给客户端访问的地址
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://123.57.236.125:9092
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       # 允许使用PLAINTEXT协议(镜像中默认为关闭,需要手动开启)

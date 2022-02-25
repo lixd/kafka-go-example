@@ -1,6 +1,8 @@
 # kafka-go-example
 kafka-go-example driven by sarama  
 Kafka Go 系列教程，配合以下文章食用更加哦。 
+> 本教程基于 Kafka v2.8.0(未开启 Kraft 模式)
+
 
 [Kafka(Go)系列教程](https://www.lixueduan.com/categories/Kafka/)  
 
