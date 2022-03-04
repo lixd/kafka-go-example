@@ -43,7 +43,7 @@ func (h MyConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, c
 		// 标记消息已被消费 内部会更新 consumer offset
 		sess.MarkMessage(msg, "")
 		h.count++
-		if h.count%1 == 0 {
+		if h.count%10000 == 0 {
 			fmt.Printf("name:%s 消费数:%v\n", h.name, h.count)
 		}
 	}

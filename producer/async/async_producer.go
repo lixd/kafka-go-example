@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"strconv"
-	"sync/atomic"
+	"sync"
 	"time"
 
 	"kafka-go-example/conf"
@@ -13,12 +13,10 @@ import (
 )
 
 /*
+
 	本例展示最简单的 异步生产者 的使用（除异步生产者外 kafka 还有同步生产者）
 	名词 async producer
 */
-
-var count int64
-
 func Producer(topic string, limit int) {
 	config := sarama.NewConfig()
 	// 异步生产者不建议把 Errors 和 Successes 都开启，一般开启 Errors 就行
@@ -29,22 +27,29 @@ func Producer(topic string, limit int) {
 	if err != nil {
 		log.Fatal("NewSyncProducer err:", err)
 	}
-	defer producer.AsyncClose()
+	var (
+		wg                                   sync.WaitGroup
+		enqueued, timeout, successes, errors int
+	)
+	// [!important] 异步生产者发送后必须把返回值从 Errors 或者 Successes 中读出来 不然会阻塞 sarama 内部处理逻辑 导致只能发出去一条消息
+	wg.Add(1)
 	go func() {
-		// [!important] 异步生产者发送后必须把返回值从 Errors 或者 Successes 中读出来 不然会阻塞 sarama 内部处理逻辑 导致只能发出去一条消息
-		for {
-			select {
-			case s := <-producer.Successes():
-				if s != nil {
-					log.Printf("[Producer] Success: key:%v msg:%+v \n", s.Key, s.Value)
-				}
-			case e := <-producer.Errors():
-				if e != nil {
-					log.Printf("[Producer] Errors：err:%v msg:%+v \n", e.Msg, e.Err)
-				}
-			}
+		defer wg.Done()
+		for range producer.Successes() {
+			// log.Printf("[Producer] Success: key:%v msg:%+v \n", s.Key, s.Value)
+			successes++
 		}
 	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for e := range producer.Errors() {
+			log.Printf("[Producer] Errors：err:%v msg:%+v \n", e.Msg, e.Err)
+			errors++
+		}
+	}()
+
 	// 异步发送
 	for i := 0; i < limit; i++ {
 		str := strconv.Itoa(int(time.Now().UnixNano()))
@@ -55,14 +60,18 @@ func Producer(topic string, limit int) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*10)
 		select {
 		case producer.Input() <- msg:
+			enqueued++
 		case <-ctx.Done():
-			log.Printf("msg:%v 发送超时\n", i)
+			timeout++
 		}
 		cancel()
-		atomic.AddInt64(&count, 1)
-		if atomic.LoadInt64(&count)%1000 == 0 {
-			log.Printf("已发送消息数:%v\n", count)
+		if i%10000 == 0 && i != 0 {
+			log.Printf("已发送消息数:%d 超时数:%d\n", i, timeout)
 		}
 	}
-	log.Printf("发送完毕 总发送消息数:%v\n", limit)
+
+	// We are done
+	producer.AsyncClose()
+	wg.Wait()
+	log.Printf("发送完毕 总发送条数:%d enqueued:%d timeout:%d successes: %d errors: %d\n", limit, enqueued, timeout, successes, errors)
 }

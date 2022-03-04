@@ -35,14 +35,18 @@ func Producer(topic string, limit int) {
 		log.Fatal("NewSyncProducer err:", err)
 	}
 	defer producer.Close()
+	var successes, errors int
 	for i := 0; i < limit; i++ {
 		str := strconv.Itoa(int(time.Now().UnixNano()))
 		msg := &sarama.ProducerMessage{Topic: topic, Key: nil, Value: sarama.StringEncoder(str)}
 		partition, offset, err := producer.SendMessage(msg) // 发送逻辑也是封装的异步发送逻辑，可以理解为将异步封装成了同步
 		if err != nil {
-			log.Println("SendMessage err: ", err)
-			return
+			log.Printf("SendMessage:%d err:%v\n ", i, err)
+			errors++
+			continue
 		}
+		successes++
 		log.Printf("[Producer] partitionid: %d; offset:%d, value: %s\n", partition, offset, str)
 	}
+	log.Printf("发送完毕 总发送条数:%d successes: %d errors: %d\n", limit, successes, errors)
 }
