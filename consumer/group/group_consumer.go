@@ -38,16 +38,24 @@ func (MyConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { ret
 
 // ConsumeClaim 具体的消费逻辑
 func (h MyConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	for msg := range claim.Messages() {
-		fmt.Printf("[consumer] name:%s topic:%q partition:%d offset:%d\n", h.name, msg.Topic, msg.Partition, msg.Offset)
-		// 标记消息已被消费 内部会更新 consumer offset
-		sess.MarkMessage(msg, "")
-		h.count++
-		if h.count%10000 == 0 {
-			fmt.Printf("name:%s 消费数:%v\n", h.name, h.count)
+	for {
+		select {
+		case msg := <-claim.Messages():
+			fmt.Printf("[consumer] name:%s topic:%q partition:%d offset:%d\n", h.name, msg.Topic, msg.Partition, msg.Offset)
+			// 标记消息已被消费 内部会更新 consumer offset
+			sess.MarkMessage(msg, "")
+			h.count++
+			if h.count%10000 == 0 {
+				fmt.Printf("name:%s 消费数:%v\n", h.name, h.count)
+			}
+
+		// Should return when `session.Context()` is done.
+		// If not, will raise `ErrRebalanceInProgress` or `read tcp <ip>:<port>: i/o timeout` when kafka rebalance. see:
+		// https://github.com/Shopify/sarama/issues/1192
+		case <-sess.Context().Done():
+			return nil
 		}
 	}
-	return nil
 }
 
 func ConsumerGroup(topic, group, name string) {
