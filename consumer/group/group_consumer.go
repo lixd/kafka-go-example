@@ -40,7 +40,10 @@ func (MyConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { ret
 func (h MyConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for {
 		select {
-		case msg := <-claim.Messages():
+		case msg, ok := <-claim.Messages():
+			if !ok {
+				return nil
+			}
 			fmt.Printf("[consumer] name:%s topic:%q partition:%d offset:%d\n", h.name, msg.Topic, msg.Partition, msg.Offset)
 			// 标记消息已被消费 内部会更新 consumer offset
 			sess.MarkMessage(msg, "")
