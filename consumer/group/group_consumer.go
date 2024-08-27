@@ -63,7 +63,7 @@ func (h MyConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, c
 
 func ConsumerGroup(topic, group, name string) {
 	config := sarama.NewConfig()
-	config.Consumer.Return.Errors = true
+	config.Consumer.Return.Errors = true // 指定返回错误
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	cg, err := sarama.NewConsumerGroup([]string{conf.HOST}, group, config)
@@ -72,7 +72,14 @@ func ConsumerGroup(topic, group, name string) {
 	}
 	defer cg.Close()
 	var wg sync.WaitGroup
-	wg.Add(1)
+	wg.Add(2)
+	// 错误处理
+	go func() {
+		defer wg.Done()
+		for err = range cg.Errors() {
+			fmt.Println("ERROR", err)
+		}
+	}()
 	go func() {
 		defer wg.Done()
 		handler := MyConsumerGroupHandler{name: name}
